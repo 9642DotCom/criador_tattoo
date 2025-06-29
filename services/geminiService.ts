@@ -1,11 +1,15 @@
 
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
+// Obter a API key da variável de ambiente Vite
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("API key do Gemini não encontrada! Por favor, defina VITE_GEMINI_API_KEY no arquivo .env");
+  throw new Error("VITE_GEMINI_API_KEY não está configurada");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey });
 
 const fileToGenerativePart = async (file: File): Promise<Part> => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {

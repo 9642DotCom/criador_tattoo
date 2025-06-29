@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, ChangeEvent } from 'react';
-import { AppStep } from './types';
-import { generateTattooFromUpload, generateTattooFromPrompt } from './services/geminiService';
-import { UploadIcon, WandSparklesIcon, DownloadIcon, ArrowLeftIcon, RefreshCwIcon, CameraIcon } from './components/icons';
+import { AppStep } from './types.ts';
+import { generateTattooFromUpload, generateTattooFromPrompt } from './services/geminiService.ts';
+import { UploadIcon, WandSparklesIcon, DownloadIcon, ArrowLeftIcon, RefreshCwIcon, CameraIcon } from './components/icons.tsx';
 
 // Helper to get a data URL from a File object
 const getFileAsDataURL = (file: File): Promise<string> => {
@@ -38,6 +38,7 @@ const App: React.FC = () => {
     
     const bodyFileInputRef = useRef<HTMLInputElement>(null);
     const tattooFileInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelect = async (
       event: ChangeEvent<HTMLInputElement>, 
@@ -49,6 +50,9 @@ const App: React.FC = () => {
             setFile(file);
             const previewUrl = await getFileAsDataURL(file);
             setPreview(previewUrl);
+            if (setFile === setBodyPhotoFile) {
+                setStep(AppStep.CHOOSE_METHOD);
+            }
         }
     };
 
@@ -67,8 +71,13 @@ const App: React.FC = () => {
     const handleBack = () => {
         if (step === AppStep.CHOOSE_METHOD) {
             setStep(AppStep.SELECT_BODY_PHOTO);
+            setBodyPhotoFile(null);
+            setBodyPhotoPreview(null);
         } else if (step === AppStep.UPLOAD_TATTOO_DESIGN || step === AppStep.CREATE_TATTOO_WITH_AI) {
             setStep(AppStep.CHOOSE_METHOD);
+            setTattooDesignFile(null);
+            setTattooDesignPreview(null);
+            setTattooPrompt('');
         }
     }
 
@@ -115,11 +124,7 @@ const App: React.FC = () => {
                     <div className="w-full max-w-md text-center">
                         <h1 className="text-3xl font-bold text-white mb-2">Gerador de Tatuagem IA</h1>
                         <p className="text-gray-400 mb-6">Veja como uma tatuagem ficaria em sua pele.</p>
-                        {bodyPhotoPreview && (
-                             <div className="mb-4">
-                                <img src={bodyPhotoPreview} alt="Prévia do local" className="rounded-lg max-h-60 mx-auto" />
-                            </div>
-                        )}
+                        
                         <input
                             type="file"
                             accept="image/*"
@@ -133,26 +138,24 @@ const App: React.FC = () => {
                                 className="flex-1 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
                             >
                                 <UploadIcon className="h-5 w-5" />
-                                Enviar Foto
+                                Enviar Foto do Local
                             </button>
-                             <input type="file" accept="image/*" capture="environment" className="hidden" />
+                             <input 
+                                type="file" 
+                                accept="image/*" 
+                                capture="environment" 
+                                className="hidden"
+                                ref={cameraInputRef}
+                                onChange={(e) => handleFileSelect(e, setBodyPhotoFile, setBodyPhotoPreview)}
+                             />
                             <button
-                                onClick={() => alert("A função de câmera será ativada em um dispositivo móvel compatível.")}
+                                onClick={() => cameraInputRef.current?.click()}
                                 className="flex-1 w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
                             >
                                 <CameraIcon className="h-5 w-5" />
                                 Usar Câmera
                             </button>
                         </div>
-
-                        {bodyPhotoFile && (
-                            <button
-                                onClick={() => setStep(AppStep.CHOOSE_METHOD)}
-                                className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors mt-6"
-                            >
-                                Avançar
-                            </button>
-                        )}
                     </div>
                 );
             
@@ -162,8 +165,8 @@ const App: React.FC = () => {
                         <BackButton onClick={handleBack} />
                         <h2 className="text-2xl font-bold text-white mb-6">Como você quer criar sua tatuagem?</h2>
                         {bodyPhotoPreview && (
-                             <div className="mb-6 opacity-50">
-                                <img src={bodyPhotoPreview} alt="Prévia do local" className="rounded-lg max-h-40 mx-auto" />
+                             <div className="mb-6">
+                                <img src={bodyPhotoPreview} alt="Prévia do local" className="rounded-lg max-h-40 mx-auto border-2 border-gray-600" />
                             </div>
                         )}
                         <div className="space-y-4">
