@@ -1,0 +1,8 @@
+{
+  "name": "Gerador de Tatuagem com IA",
+  "description": "Tire ou envie uma foto da parte do seu corpo, descreva ou envie um design de tatuagem e veja como ficaria em sua pele com o poder da IA.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "prompt": ""
+}
